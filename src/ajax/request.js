@@ -4,7 +4,7 @@
  */
 import ax from 'axios';
 import { message } from 'antd';
-import { host } from './config';
+import { host,login_page } from './config';
 import { set_logstate } from './tool'
 
 const error_info = {
@@ -41,6 +41,11 @@ const axios_config_json = {
             message.error("返回值格式错误");
         }
         // 100 未登录 200 权限不足 300 权限不足 0 未定义错误
+        if(res.code===100){
+            window.location.href = login_page+"?redirectUrl="+window.location.href;
+            message.warn("未登录！");
+            return Promise.reject(res.msg);
+        }
         if(res.code===1003000001){
             message.warn(res.msg);
             set_logstate(false);

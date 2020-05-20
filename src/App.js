@@ -6,6 +6,8 @@ import 'antd/dist/antd.css';
 import Side from './components/side';
 import Router from './router';
 import { BrowserRouter} from 'react-router-dom';
+import './keep.op';
+import './revision.op';
 
 const { Content, Sider } = Layout;
 

@@ -19,18 +19,26 @@ class Monitor extends Component{
         this.state = {
             title:this.props.title,
             setOption:{},
-            data:props.data
-        };
-        this.loader = [];
+            data:props.data,
+            cpu_data:[{
+                dataX:[],
+                series_info:{
+                    type:"line"
+                }
+            }]
+                        };
+        this.loader = [
+
+        ];
         console.log(props.data)
     }
     componentWillMount(){
-        // this.getData()
+        this.getData()
         // var info=this.getData(this.props.api)
         console.log(this.props.data)
         this.option={
             title: {
-            text:"周期：300s",
+            text: this.state.title+"(周期：300s)",
                 textStyle:{
                     fontSize:14
                 },
@@ -92,48 +100,47 @@ class Monitor extends Component{
         
     }
     getData(api){
-        var out={};
-        axios.get(get_cpu_info+"?uuid="+this.state.uuid).then(e=>{
-            var dataX=[],data=e.data,name=[],series_info=[];
-            for(let i in data){
-                name.push(data[i].name);
-                var series_data=[],series_json={};
-                for(var j in data.data){
-                    series_data.push(data.data[j][1])
-                }
-                series_json.data=series_data;
-                series_json.name=data[i].name;
-                series_json.type="line";
-                series_info.push(series_json)
-            }
+        var uuid=window.localStorage.getItem("uuid");
+        //+"?uuid="+this.state.uuid+"&start="+(start||this.state.startTime)+"&end="+(end||this.state.endTime)
+        axios.get(get_cpu_info+"?uuid="+uuid+"&start=2020-05-19 10:30&end=2020-05-19 12:30").then(e=>{
+            var data=e.data,dataX=[],cpu_data=[];
             for(var k in data[0].data){
                 dataX.push(data[0].data[k][0])
             }
-            var info={
-                dataX:dataX,
-                series_info:series_info,
-                name:name
-            }
-            this.option.xAxis.data=dataX
-            this.option.series=series_info
+            for(var i in data){
+                var base=data[i].data;
+                var series_data=[],series_json={};
+                for(var j in base){
+                    var series_info=[];
+                    series_data.push(base[j][1])
+                    series_json.data=series_data;
+                series_json.name=data[i].name;
+                series_json.type="line";
+                series_info.push(series_json);
+                var cpu_json={
+                    series_info:series_info,
+                    dataX:dataX
+                }
+                }
+                cpu_data.push(cpu_json);
+
+                
+            }           
+            console.log(cpu_data)
+            this.setState({
+                cpu_data:cpu_data
+            })
         })
-        // return out;
         
     }
     componentDidMount(){
-        var data=this.props.data;console.log(data)
-        if(data){
-            this.option.xAxis.data=data.dataX.map((i,k)=>{
-                return i.replace(" ","\n");
-            });
-            this.option.series=data.series_info;
-        }else{
-            this.option.xAxis.data=[];
-            this.option.series=[{
-                data:[],
-                type:"line"
-            }]
-        }
+        // var data=this.props.data;console.log(data)
+        // if(data){
+        //     this.option.xAxis.data=data.dataX.map((i,k)=>{
+        //         return i.replace(" ","\n");
+        //     });
+        //     this.option.series=data.series_info;
+        // }
     }
     cancel(){
         this.setState({
@@ -155,16 +162,23 @@ class Monitor extends Component{
                 return i.replace(" ","\n");
             });
             this.option.series=data.series_info;
-        }else{
-            this.option.xAxis.data=[];
-            this.option.series=[{
-                data:[],
-                type:"line"
-            }]
         }
         return (
             <div style={{float:"left","width":this.props.width||"30%","height":"300px","marginRight":this.props.right||0}}>
-            <ReactEchartsCore option={this.option} style={{"width":"100%","height":"300px"}} echarts={echarts} />
+                {
+                    this.state.cpu_data.map((i,k)=>{
+                        console.log(i)
+                        if(i){
+                            this.option.xAxis.data=i.dataX.map((j,m)=>{
+                                return j.replace(" ","\n");
+                            });
+                            this.option.series=i.series_info;
+                            return <ReactEchartsCore option={this.option} style={{"width":"100%","height":"300px"}} echarts={echarts} key={k} />
+                        }
+                        
+                    })
+                }
+            
             <Modal {...modal_info}>
             <ReactEchartsCore option={this.option} style={{"width":"100%","height":"400px"}} echarts={echarts} />
             </Modal>

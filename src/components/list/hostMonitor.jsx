@@ -37,56 +37,41 @@ class Monitor extends Component{
                 render:(text,record,index)=>index+1
             },
             {
-                title:"client_version",
-                dataIndex:"client_version",
-                // className:"word_set"
-            },
-            {
-                title:"group",
-                dataIndex:"group"
-            },
-            {
                 title:"hostname",
-                dataIndex:"hostname"
-            },
-            {
-                title:"inner_ip",
                 // width:200,
-                dataIndex:"inner_ip",
+                dataIndex:"hostname",
                 // className:"word_set"
                 render:e=>{
-                return <div style={{width:"50px",wordWrap:"break-all"}}>{e}</div>
+                return e
                 }
             },
             {
-                title:"owner",
-                dataIndex:"owner"
+                title:"cpu_percent",
+                dataIndex:"cpu_percent",
+                // className:"word_set"
             },
             {
-                title:"public_ip",
-                dataIndex:"public_ip",
-                render:e=>{
-                    return <div style={{width:"50px",wordWrap:"break-all"}}>{e}</div>
-                    }
+                title:"disk_percent",
+                dataIndex:"disk_percent"
+            },
+            {
+                title:"disk_util",
+                dataIndex:"disk_util"
+            },
+            {
+                title:"omsa_status",
+                dataIndex:"omsa_status"
             },
             {
                 title:"report_time",
                 dataIndex:"report_time"
             },
             {
-                title:"start_time",
-                dataIndex:"start_time"
-            },
-            {
-                title:"uuid",
-                dataIndex:"uuid"
-            },
-            {
                 title:"操作",
                 fixed:"right",
                 width:100,
                 render:e=>{
-                    return <Button type="primary" size="small" onClick={this.detail.bind(this)}>监控图表</Button>
+                    return <Button type="primary" size="small" onClick={()=>{this.detail(e.uuid)}}>监控图表</Button>
                 }
             }
         ]
@@ -101,11 +86,15 @@ class Monitor extends Component{
                     data:arr,
                     pageTotal:data.total
                 })
+                window.localStorage.setItem("listDada",JSON.stringify(list));
             }
         })
     }
-    detail(){
-        this.props.history.push('/host/detail');
+    detail(id){
+        // this.props.history.push('/host/detail/'+id);
+        window.localStorage.setItem("uuid",id);
+        this.props.history.push({pathname:'/host/detail',query:{"id":id}});
+
     }
     get_filter(data){
         // let paths = this.props.location.pathname;

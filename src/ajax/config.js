@@ -1,6 +1,8 @@
 // import { getUrlParam } from './tool';
 
-let domain = "http://opdash.baimaodai.cn:24020/";
+// let domain = "http://opdash.baimaodai.cn:24020/";
+let domain="http://dashboard.op.baimaodai.com/";
+let login="https://auth.baimaodai.com";
 let browser_host = window.location.hostname;
 
 // if(browser_host==="open.zhiyoou.com"){
@@ -15,7 +17,7 @@ let browser_host = window.location.hostname;
 
 // 通用host
 export const host = domain;
-
+export const login_page = login+ "/auth/login";
 // 列表每页条数
 export const page = {size:50}
 
