@@ -10,8 +10,7 @@ stages:
 before-build:
   stage: before-build
   script:
-    - export NVM_DIR="/opt/nvm"
-    - $NVM_DIR/nvm.sh
+    - \. "/opt/nvm/nvm.sh"
     - nvm use $NODE_VERSION
     - npm install
   artifacts:
