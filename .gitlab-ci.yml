@@ -1,3 +1,6 @@
+variables:
+  NODE_VERSION: "v9.2.0"
+
 stages:
   - before-build
   - build 
@@ -7,6 +10,7 @@ stages:
 before-build:
   stage: before-build
   script:
+    - nvm use $NODE_VERSION
     - npm install
   artifacts:
     paths:
@@ -16,6 +20,7 @@ before-build:
 build:
   stage: build
   script:
+    - nvm use $NODE_VERSION
     - npm run-script build
   artifacts:
     paths:
