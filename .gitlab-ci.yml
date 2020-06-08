@@ -10,7 +10,6 @@ stages:
 before-build:
   stage: before-build
   script:
-    - source /etc/profile
     - nvm use $NODE_VERSION
     - npm install
   artifacts:
@@ -21,7 +20,6 @@ before-build:
 build:
   stage: build
   script:
-    - source /etc/profile
     - nvm use $NODE_VERSION
     - npm run-script build
   artifacts:
