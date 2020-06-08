@@ -33,18 +33,18 @@ class Monitor extends Component {
             agent_version: {
                 name: "agent_version"
             },
-            connections: {
-                name: "connections"
-            },
-            cpu_percent: {
-                name: "cpu_percent"
-            },
-            disk_percent: {
-                name: "disk_percent"
-            },
-            disk_util: {
-                name: "disk_util"
-            },
+            // connections: {
+            //     name: "connections"
+            // },
+            // cpu_percent: {
+            //     name: "cpu_percent"
+            // },
+            // disk_percent: {
+            //     name: "disk_percent"
+            // },
+            // disk_util: {
+            //     name: "disk_util"
+            // },
             hostname: {
                 name: "hostname"
             },
@@ -57,9 +57,9 @@ class Monitor extends Component {
             machine_type: {
                 name: "machine_type"
             },
-            mem_percent: {
-                name: "mem_percent"
-            },
+            // mem_percent: {
+            //     name: "mem_percent"
+            // },
             omsa_status: {
                 name: "omsa_status"
             },
@@ -69,18 +69,15 @@ class Monitor extends Component {
             os_version: {
                 name: "os_version"
             },
-            pids: {
-                name: "pids"
-            },
+            // pids: {
+            //     name: "pids"
+            // },
             report_time: {
                 name: "os_type"
             },
             serial_num: {
                 name: "serial_num"
             },
-            uuid: {
-                name: "uuid"
-            }
         }
         this.source = {
         }
@@ -121,6 +118,7 @@ class Monitor extends Component {
         // }
         axios.get(get_base_info+"?uuid="+window.localStorage.getItem("uuid")).then(e=>{
             var detail=e.data;
+            delete detail.uuid;
             this.setState({
                 data:detail
             })

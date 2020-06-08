@@ -77,8 +77,8 @@ class Monitor extends Component{
             },
             xAxis: {
                 type: 'category',
-                boundaryGap: false,
-                axisLabel:{interval:15}, // 间隔几个空格显示
+                boundaryGap: true,
+                axisLabel:{interval:25}, // 间隔几个空格显示
                 data: []
             },
             yAxis: {
@@ -152,9 +152,11 @@ class Monitor extends Component{
         var data=this.props.data;console.log(this.state.data)
         if(data){
             this.option.xAxis.data=data.dataX.map((i,k)=>{
+                i=i.slice(5);
                 return i.replace(" ","\n");
             });
             this.option.series=data.series_info;
+            this.option.xAxis.axisLabel={interval:parseInt(data.dataX.length/6)}
         }else{
             this.option.xAxis.data=[];
             this.option.series=[{
