@@ -10,6 +10,7 @@ stages:
 before-build:
   stage: before-build
   script:
+    - source ~/.bashrc
     - nvm use $NODE_VERSION
     - npm install
   artifacts:
