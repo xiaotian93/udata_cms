@@ -61,7 +61,7 @@ upload:
     - export COMMIT_ID=$CI_COMMIT_SHA
     - export UPLOAD_FILE="$COMMIT_JOB_NAME.tar.gz"
     - cd $OUTPUT_DIR
-    - tar czvf ../$COMMIT_JOB_NAME.tar.gz .[!.]* *
+    - tar czvf ../$COMMIT_JOB_NAME.tar.gz *
     - export COMMIT_ETAG=$(qshell qetag $UPLOAD_FILE)
     - python /srv/projects/qiniu_upload.py $COMMIT_JOB_NAME/$COMMIT_BRANCH/$COMMIT_VERSION/$UPLOAD_FILE $PWD/$UPLOAD_FILE
     - curl -d "commit_user=$COMMIT_USER&commit_log=$COMMIT_LOG&commit_time=$PACKAGE_TIME&service=$COMMIT_JOB_NAME&commit_version=$COMMIT_VERSION&commit_etag=$COMMIT_ETAG&package_name=$UPLOAD_FILE&branch=$COMMIT_BRANCH" "http://online-deploy.baimaodai.com/openapi/version/add_version"
