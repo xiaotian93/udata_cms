@@ -23,7 +23,7 @@ build:
   script:
     - \. "/opt/nvm/nvm.sh"
     - nvm use $NODE_VERSION
-    - npm run build
+    - CI=false npm run build
   artifacts:
     paths:
       - static/
