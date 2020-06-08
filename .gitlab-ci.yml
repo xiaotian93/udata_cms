@@ -21,6 +21,7 @@ before-build:
 build:
   stage: build
   script:
+    - \. "/opt/nvm/nvm.sh"
     - nvm use $NODE_VERSION
     - npm run-script build
   artifacts:
