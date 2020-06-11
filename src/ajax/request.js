@@ -105,7 +105,7 @@ const axios_config = {
 // alert(1)
                 window.localStorage.setItem("isLogin","");
                 //alert(1)
-                window.location.href = window.location.href;
+                // window.location.href = window.location.href;
                 return Promise.reject(res.msg);
             }
             if(res.code===1003000001){

@@ -7,11 +7,7 @@ import 'echarts/lib/component/title';
 import 'echarts/lib/component/toolbox';
 import 'echarts/lib/component/legend';
 import 'echarts/lib/component/tooltip';
-import {datas} from '../detail/data';
 import {Modal} from 'antd';
-import {format_time} from '../../ajax/tool';
-import axios from '../../ajax/request';
-import {get_cpu_info} from '../../ajax/api';
 class Monitor extends Component{
     constructor(props) {
         super(props);
@@ -22,22 +18,57 @@ class Monitor extends Component{
             data:props.data
         };
         this.loader = [];
-        console.log(props.data)
+        
     }
     componentWillMount(){
-        // this.getData()
-        // var info=this.getData(this.props.api)
-        console.log(this.props.data)
+        var yAxisInfo={type: 'value'},tooltip={trigger: 'axis'};
+        if(this.props.text&&(this.props.text==="cpu_percent"||this.props.text==="mem_percent"||this.props.text==="disk_percent")){
+            yAxisInfo={
+                type: 'value',
+                min: 0,
+                max: 100,
+                axisLabel: {
+                    formatter: '{value}%'
+                },
+                toolbox:{
+                    formatter:'{a}:{b}%'
+                }
+            }
+            tooltip={
+                trigger: 'axis',
+                formatter:'{b}</br>{a}:{c}%'
+            }
+        }
+        if(this.props.text&&(this.props.text==="mem_total"||this.props.text==="mem_free"||this.props.text==="disk_total"||this.props.text==="disk_used")){
+            yAxisInfo={
+                type: 'value',
+                name:"GB",
+                    axisLabel:{
+                        formatter: (value)=>(value/1024/1024/1024).toFixed(2)
+                    }
+            }
+            tooltip={
+                trigger: 'axis',
+                formatter:e=>{
+                    console.log(e)
+                    return e[0].name+"</br>"+e[0].seriesName+"："+((e[0].value/1024/1024/1024).toFixed(2))+"GB";
+                }
+            }
+        }
+        if(this.props.text&&(this.props.text==="network_traffic_in"||this.props.text==="network_traffic_out")){
+            yAxisInfo={
+                type: 'value',
+                name:"Mbps",
+            }
+        }
         this.option={
             title: {
-            text:"周期：300s",
+            text:"",
                 textStyle:{
                     fontSize:14
                 },
             },
-            tooltip: {
-                trigger: 'axis'
-            },
+            tooltip: tooltip,
             legend: {
                 // data: info.name,
                 show:true,
@@ -81,9 +112,7 @@ class Monitor extends Component{
                 axisLabel:{interval:25}, // 间隔几个空格显示
                 data: []
             },
-            yAxis: {
-                type: 'value'
-            },
+            yAxis: yAxisInfo,
             series: [{
                 data:[],
                 type:"line"
@@ -91,37 +120,8 @@ class Monitor extends Component{
         };
         
     }
-    getData(api){
-        var out={};
-        axios.get(get_cpu_info+"?uuid="+this.state.uuid).then(e=>{
-            var dataX=[],data=e.data,name=[],series_info=[];
-            for(let i in data){
-                name.push(data[i].name);
-                var series_data=[],series_json={};
-                for(var j in data.data){
-                    series_data.push(data.data[j][1])
-                }
-                series_json.data=series_data;
-                series_json.name=data[i].name;
-                series_json.type="line";
-                series_info.push(series_json)
-            }
-            for(var k in data[0].data){
-                dataX.push(data[0].data[k][0])
-            }
-            var info={
-                dataX:dataX,
-                series_info:series_info,
-                name:name
-            }
-            this.option.xAxis.data=dataX
-            this.option.series=series_info
-        })
-        // return out;
-        
-    }
     componentDidMount(){
-        var data=this.props.data;console.log(data)
+        var data=this.props.data;
         if(data){
             this.option.xAxis.data=data.dataX.map((i,k)=>{
                 return i.replace(" ","\n");
@@ -149,7 +149,7 @@ class Monitor extends Component{
             width:"80%"
         }
         
-        var data=this.props.data;console.log(this.state.data)
+        var data=this.props.data;
         if(data){
             this.option.xAxis.data=data.dataX.map((i,k)=>{
                 i=i.slice(5);

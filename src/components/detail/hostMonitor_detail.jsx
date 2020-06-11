@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import TableCol from '../templates/TableCol_4';
 import { Tabs,DatePicker,Select,Button } from 'antd';
 import Echarts from '../templates/echarts';
-import axios from '../../ajax/request';
+import {axios_json} from '../../ajax/request';
 import moment from 'moment';
 import {get_base_info,get_cpu_info,get_mem_info,get_disk_list,get_disk_info,get_disk_util_list,get_disk_util_info,get_network_interface_list,get_network_info} from '../../ajax/api';
 const { TabPane } = Tabs;
@@ -17,13 +17,13 @@ class Monitor extends Component {
             cpu_data:[],
             mem_data:[],
             disk_list:[],
-            disk_data:[],
+            disk_data:[{legend:""}],
             startTime:moment().subtract(0,"days").format("YYYY-MM-DD")+ " 00:00:00",
             endTime:moment().subtract(0,"days").format("YYYY-MM-DD")+ " 23:59:59",
-            disk_util_data:[],
+            disk_util_data:[{legend:""}],
             disk_util_list:[],
             network_list:[],
-            network_data:[]
+            network_data:[{legend:""}]
             // id:props.location.query.id
         };
         this.loader = [];
@@ -92,23 +92,28 @@ class Monitor extends Component {
         this.get_cpu(get_network_info,"network_data");
     }
     get_select(){
-        axios.get(get_disk_list+"?uuid="+this.state.uuid).then(e=>{
+        axios_json.get(get_disk_list+"?uuid="+this.state.uuid).then(e=>{
             var data=e.data;
+            this.disk_change(data[0]);
             this.setState({
-                disk_list:data
+                disk_list:data,
+                disk_value:data[0]
             })
         })
-        axios.get(get_disk_util_list+"?uuid="+this.state.uuid).then(e=>{
+        axios_json.get(get_disk_util_list+"?uuid="+this.state.uuid).then(e=>{
             var data=e.data;
+            this.disk_util_change(data[0])
             this.setState({
-                disk_util_list:data
+                disk_util_list:data,
+                disk_util_value:data[0]
             })
         })
-        axios.get(get_network_interface_list+"?uuid="+this.state.uuid).then(e=>{
+        axios_json.get(get_network_interface_list+"?uuid="+this.state.uuid).then(e=>{
             var data=e.data;
+            this.network_change(data[0])
             this.setState({
                 network_list:data,
-                // network_value:data[0]
+                network_value:data[0]
             })
         })
     }
@@ -116,7 +121,7 @@ class Monitor extends Component {
         // var param={
         //     uuid:window.localStorage.getItem("uuid")
         // }
-        axios.get(get_base_info+"?uuid="+window.localStorage.getItem("uuid")).then(e=>{
+        axios_json.get(get_base_info+"?uuid="+window.localStorage.getItem("uuid")).then(e=>{
             var detail=e.data;
             delete detail.uuid;
             this.setState({
@@ -127,7 +132,7 @@ class Monitor extends Component {
 
     }
     get_cpu(api,status,start,end,disk){
-        axios.get(api+"?uuid="+this.state.uuid+"&start="+(start||this.state.startTime)+"&end="+(end||this.state.endTime)+(disk?("&"+disk.name+"="+disk.value):"")).then(e=>{
+        axios_json.get(api+"?uuid="+this.state.uuid+"&start="+(start||this.state.startTime)+"&end="+(end||this.state.endTime)+(disk?("&"+disk.name+"="+disk.value):"")).then(e=>{
             var data=e.data,dataX=[],cpu_data=[];
             for(var k in data[0].data){
                 dataX.push(data[0].data[k][0])
@@ -144,7 +149,8 @@ class Monitor extends Component {
                 series_info.push(series_json);
                 var cpu_json={
                     series_info:series_info,
-                    dataX:dataX
+                    dataX:dataX,
+                    legend:data[i].name
                 }
                 }
                 cpu_data.push(cpu_json);
@@ -165,11 +171,11 @@ class Monitor extends Component {
         })
         // this.get_cpu(start,end)
       }
-      disk_change(){
+      disk_change(disk_value){
         this.setState({
             disk_data:[],
         })
-        this.get_cpu(get_disk_info,"disk_data",this.state.startTime,this.state.endTime,{name:"device",value:this.state.disk_value||""});
+        this.get_cpu(get_disk_info,"disk_data",this.state.startTime,this.state.endTime,{name:"device",value:disk_value||""});
       }
       cpu_change(){
         this.setState({
@@ -185,17 +191,17 @@ class Monitor extends Component {
               [name]:value
           })
       }
-      disk_util_change(){
+      disk_util_change(disk_util_value){
         this.setState({
             disk_util_data:[],
         })
-        this.get_cpu(get_disk_util_info,"disk_util_data",this.state.startTime,this.state.endTime,{name:"device",value:this.state.disk_util_value||""});
+        this.get_cpu(get_disk_util_info,"disk_util_data",this.state.startTime,this.state.endTime,{name:"device",value:disk_util_value||""});
       }
-      network_change(){
+      network_change(network_value){
         this.setState({
             network_data:[],
         })
-        this.get_cpu(get_network_info,"network_data",this.state.startTime,this.state.endTime,{name:"interface",value:this.state.network_value||""});
+        this.get_cpu(get_network_info,"network_data",this.state.startTime,this.state.endTime,{name:"interface",value:network_value||""});
       }
     render() {
         return (
@@ -223,7 +229,7 @@ class Monitor extends Component {
                                         <Echarts title="系统平均负载" api="" width="30%"></Echarts> */}
                                         {
                                             this.state.cpu_data.map((i,k)=>{
-                                                return <Echarts title="CPU使用率" api="" width="40%"  data={i} key={k} right={(Number(k)===this.state.cpu_data.length-1)?"0":"5%"}></Echarts>
+                                                return <Echarts title="CPU使用率" api="" width="45%"  data={i} key={k} right={(Number(k)===this.state.cpu_data.length-1)?"0":"5%"} text={i.legend} />
                                             })
                                         }
                                     </div>
@@ -233,7 +239,7 @@ class Monitor extends Component {
                                     <div style={{overflow:"hidden"}}>
                                         {
                                             this.state.mem_data.map((i,k)=>{
-                                                return <Echarts title="CPU使用率" api="" width="30%"  data={i} key={k} right={(Number(k)===this.state.mem_data.length-1)?"0":"5%"}></Echarts>
+                                                return <Echarts title="CPU使用率" api="" width="45%"  data={i} key={k} right={(Number(k)===this.state.mem_data.length-1)?"0":"5%"} text={i.legend} />
                                             })
                                         }
                                     </div>
@@ -243,21 +249,21 @@ class Monitor extends Component {
                                 <div style={{marginBottom:"10px"}}>
                                     <span>选择时间：</span>
                                     <RangePicker showTime={{ format: 'HH:mm' }} format="YYYY-MM-DD HH:mm" onChange={this.onChange.bind(this)}/>
-                                    <Select style={{width:"150px",marginLeft:"10px"}} placeholder="请选择磁盘" onChange={(e)=>{this.change_select(e,"disk_value")}}>
+                                    <Select style={{width:"150px",marginLeft:"10px"}} placeholder="请选择磁盘" onChange={(e)=>{this.change_select(e,"disk_value")}} value={this.state.disk_value}>
                                     {
                                         this.state.disk_list.map((i,k)=>{
                                         return <Option value={i} key={k}>{i}</Option>
                                         })
                                     }
                                 </Select>
-                                <Button type="primary" size="small" onClick={this.disk_change.bind(this)} style={{marginLeft:"10px"}}>确定</Button>
+                                <Button type="primary" size="small" onClick={()=>{this.disk_change(this.state.disk_value)}} style={{marginLeft:"10px"}}>确定</Button>
                                 </div>
                                 
                                 <div style={{marginBottom:"20px"}}>
                                     <div style={{overflow:"hidden"}}>
                                     {
                                             this.state.disk_data.map((i,k)=>{
-                                                return <Echarts title="CPU使用率" api="" width="30%"  data={i} key={k} right={(Number(k)===this.state.disk_data.length-1)?"0":"5%"}></Echarts>
+                                                return <Echarts title="CPU使用率" api="" width="45%"  data={i} key={k} right={(Number(k)===this.state.disk_data.length-1)?"0":"5%"} text={i?i.legend:""} />
                                             })
                                         }
                                     </div>
@@ -267,21 +273,21 @@ class Monitor extends Component {
                                 <div style={{marginBottom:"10px"}}>
                                     <span>选择时间：</span>
                                     <RangePicker showTime={{ format: 'HH:mm' }} format="YYYY-MM-DD HH:mm" onChange={this.onChange.bind(this)}/>
-                                    <Select style={{width:"150px",marginLeft:"10px"}} placeholder="请选择磁盘负载" onChange={(e)=>{this.change_select(e,"disk_util_value")}}>
+                                    <Select style={{width:"150px",marginLeft:"10px"}} placeholder="请选择磁盘负载" onChange={(e)=>{this.change_select(e,"disk_util_value")}} value={this.state.disk_util_value}>
                                     {
                                         this.state.disk_util_list.map((i,k)=>{
                                         return <Option value={i} key={k}>{i}</Option>
                                         })
                                     }
                                 </Select>
-                                <Button type="primary" size="small" onClick={this.disk_util_change.bind(this)} style={{marginLeft:"10px"}}>确定</Button>
+                                <Button type="primary" size="small" onClick={()=>{this.disk_util_change(this.state.disk_util_value)}} style={{marginLeft:"10px"}}>确定</Button>
                                 </div>
                                 
                                 <div style={{marginBottom:"20px"}}>
                                     <div style={{overflow:"hidden"}}>
                                     {
                                             this.state.disk_util_data.map((i,k)=>{
-                                                return <Echarts title="CPU使用率" api="" width="30%"  data={i} key={k} right={(Number(k)===this.state.disk_util_data.length-1)?"0":"5%"}></Echarts>
+                                                return <Echarts title="CPU使用率" api="" width="45%"  data={i} key={k} right={(Number(k)===this.state.disk_util_data.length-1)?"0":"5%"} text={i?i.legend:""} />
                                             })
                                         }
                                     </div>
@@ -291,21 +297,21 @@ class Monitor extends Component {
                                 <div style={{marginBottom:"10px"}}>
                                     <span>选择时间：</span>
                                     <RangePicker showTime={{ format: 'HH:mm' }} format="YYYY-MM-DD HH:mm" onChange={this.onChange.bind(this)}/>
-                                    <Select style={{width:"150px",marginLeft:"10px"}} placeholder="请选择网络详情" onChange={(e)=>{this.change_select(e,"network_value")}}>
+                                    <Select style={{width:"150px",marginLeft:"10px"}} placeholder="请选择网络详情" onChange={(e)=>{this.change_select(e,"network_value")}} value={this.state.network_value}>
                                     {
                                         this.state.network_list.map((i,k)=>{
                                         return <Option value={i} key={k}>{i}</Option>
                                         })
                                     }
                                 </Select>
-                                <Button type="primary" size="small" onClick={this.network_change.bind(this)} style={{marginLeft:"10px"}}>确定</Button>
+                                <Button type="primary" size="small" onClick={()=>{this.network_change(this.state.network_value)}} style={{marginLeft:"10px"}}>确定</Button>
                                 </div>
                                 
                                 <div style={{marginBottom:"20px"}}>
                                     <div style={{overflow:"hidden"}}>
                                     {
                                             this.state.network_data.map((i,k)=>{
-                                                return <Echarts title="CPU使用率" api="" width="30%"  data={i} key={k} right={(Number(k)===this.state.network_data.length-1)?"0":"5%"}></Echarts>
+                                                return <Echarts title="CPU使用率" api="" width="45%"  data={i} key={k} right={(Number(k)===this.state.network_data.length-1)?"0":"5%"} text={i?i.legend:""} />
                                             })
                                         }
                                     </div>

@@ -3,7 +3,7 @@
 // let domain = "http://opdash.baimaodai.cn:24020/";
 let domain="http://dashboard.op.baimaodai.com/";
 let login="https://auth.baimaodai.com";
-let browser_host = window.location.hostname;
+// let browser_host = window.location.hostname;
 
 // if(browser_host==="open.zhiyoou.com"){
 // 	domain = "http://merchant.api.zhiyoou.com";

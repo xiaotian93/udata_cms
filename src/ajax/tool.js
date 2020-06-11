@@ -81,3 +81,15 @@ export const arr_chunk=(array,size)=>{
 	//输出新数组
 	return result
 }
+//表格排序
+export const get_sort=(a,b,str,time)=>{
+	if(a.key==="合计"||b.key==="合计"){
+		return;
+	}
+	// alert(1)
+	if(time){
+		return (a[str]?this.getTimes(a[str]):0) - (b[str]?this.getTimes(b[str]):0)
+	}else{
+		return (a[str]?Number(a[str]):0) - (b[str]?Number(b[str]):0)
+	}
+}

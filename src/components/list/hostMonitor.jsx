@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import {  withRouter } from 'react-router-dom';
 import List from '../templates/list';
-import {Button} from 'antd';
+import {Button,Input} from 'antd';
 import {axios_json} from '../../ajax/request';
 import {get_dashboard_base_info} from '../../ajax/api';
 import {page} from '../../ajax/config';
-import {arr_chunk} from '../../ajax/tool';
+import {arr_chunk,get_sort} from '../../ajax/tool';
+import {SearchOutlined} from '@ant-design/icons';
 class Monitor extends Component{
     constructor(props) {
         super(props);
@@ -18,19 +19,20 @@ class Monitor extends Component{
             data:[],
             list:[],
             listPage:1,
-            current:0
+            current:0,
+            pageInfo:true
         };
         this.loader = [];
     }
     componentWillMount(){
         this.get_list();
-        this.filter={
-            domainNo :{
-                name: "订单编号",
-                type: "text",
-                placeHolder: "请输入客户名称"
-            },
-        }
+        // this.filter={
+        //     domainNo :{
+        //         name: "订单编号",
+        //         type: "text",
+        //         placeHolder: "请输入客户名称"
+        //     },
+        // }
         this.columns=[
             {
                 title:"序号",
@@ -43,24 +45,35 @@ class Monitor extends Component{
                 // className:"word_set"
                 render:e=>{
                 return e
-                }
+                },
+                ...this.getColumnSearchProps('hostname'),
+                
             },
             {
                 title:"cpu_percent",
                 dataIndex:"cpu_percent",
-                // className:"word_set"
+                sorter:(a,b)=>{
+                    return get_sort(a,b,"cpu_percent")
+                }
             },
             {
                 title:"disk_percent",
-                dataIndex:"disk_percent"
+                dataIndex:"disk_percent",
+                sorter:(a,b)=>{
+                    return get_sort(a,b,"disk_percent")
+                }
             },
             {
                 title:"disk_util",
-                dataIndex:"disk_util"
+                dataIndex:"disk_util",
+                sorter:(a,b)=>{
+                    return get_sort(a,b,"disk_util")
+                }
             },
             {
                 title:"omsa_status",
-                dataIndex:"omsa_status"
+                dataIndex:"omsa_status",
+                ...this.getColumnSearchProps('omsa_status'),
             },
             {
                 title:"report_time",
@@ -117,6 +130,62 @@ class Monitor extends Component{
     showTotal(){
         return "共"+this.state.pageTotal+"条数据"
     }
+    getColumnSearchProps = (dataIndex) => ({
+        filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }) => (
+            <div style={{ padding: 8 }}>
+                <Input
+                    ref={node => {
+                        this.searchInput = node;
+                    }}
+                    placeholder={`Search ${dataIndex}`}
+                    value={selectedKeys[0]}
+                    onChange={e => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+                    onPressEnter={() => this.handleSearch(selectedKeys, confirm)}
+                    style={{ width: 188, marginBottom: 8, display: 'block' }}
+                />
+                <Button
+                    type="primary"
+                    onClick={() => this.handleSearch(selectedKeys, confirm)}
+                    size="small"
+                    style={{ width: 90, marginRight: 8 }}
+                >
+                    查询
+            </Button>
+                <Button onClick={() => this.handleReset(clearFilters)} size="small" style={{ width: 90 }}>
+                    重置
+            </Button>
+            </div>
+        ),
+        filterIcon: filtered => (
+            <SearchOutlined style={{ fontSize: "16px" }} />
+            //   <Icon type="search" style={{ color: filtered ? '#1890ff' : undefined }} />
+        ),
+        onFilter: (value, record) =>
+            record[dataIndex]
+                .toString()
+                .toLowerCase()
+                .includes(value.toLowerCase()),
+
+        onFilterDropdownVisibleChange: visible => {
+            if (visible) {
+                setTimeout(() => this.searchInput.select());
+            }
+        },
+        render: text => (
+            <div>{text}</div>
+        ),
+    });
+
+    handleSearch = (selectedKeys, confirm) => {
+        confirm();
+        this.setState({ searchText: selectedKeys[0], pageInfo: false });
+    };
+
+
+    handleReset = clearFilters => {
+        clearFilters();
+        this.setState({ searchText: '', pageInfo: true });
+    }; 
     render(){
         let pagination = {
             total : this.state.pageTotal,
@@ -130,16 +199,13 @@ class Monitor extends Component{
             rowKey:"hostname",
             columns:this.columns ,
             dataSource:this.state.data[this.state.current],
-            pagination : pagination,
+            pagination : this.state.pageInfo?pagination:false,
             scroll:{
                 x:900
             }
         }
         let table={
-            filter:{
-                "data-get":this.get_filter.bind(this),
-                "data-source":this.filter,
-            },
+            filter:null,
             tableInfo:table_props,
             tableTitle:{
                 left:null,
