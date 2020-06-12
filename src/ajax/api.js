@@ -20,7 +20,15 @@ const api = {
 	//获取网络接口
 	get_network_interface_list:"/api/get_network_interface_list",
 	//获取网络详情
-	get_network_info:"/api/get_network_info"
+	get_network_info:"/api/get_network_info",
+	//宽带监控
+	get_all_traffic_info:"/api/get_all_traffic_info",
+	//主机监控总览
+	get_dashboard_warnings:"/api/get_dashboard_warnings_summary",
+	//连接数
+	get_connections_info:"/api/get_connections_info",
+	//进程数
+	get_pids_info:"/api/get_pids_info",
 }
 
 module.exports = api ;

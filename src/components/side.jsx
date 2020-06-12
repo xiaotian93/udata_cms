@@ -40,9 +40,9 @@ class SiderCustom extends Component {
                         <Menu.Item key={"/host"}>
                             <Link to="/host"><span>主机监控</span></Link>
                         </Menu.Item>
-                        {/* <Menu.Item key={"/test"}>
-                            <Link to="/test"><span>测试</span></Link>
-                        </Menu.Item> */}
+                        <Menu.Item key={"/broadband"}>
+                            <Link to="/broadband"><span>宽带监控</span></Link>
+                        </Menu.Item>
                 </Menu>
         )
     }

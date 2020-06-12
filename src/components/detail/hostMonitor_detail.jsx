@@ -4,7 +4,7 @@ import { Tabs,DatePicker,Select,Button } from 'antd';
 import Echarts from '../templates/echarts';
 import {axios_json} from '../../ajax/request';
 import moment from 'moment';
-import {get_base_info,get_cpu_info,get_mem_info,get_disk_list,get_disk_info,get_disk_util_list,get_disk_util_info,get_network_interface_list,get_network_info} from '../../ajax/api';
+import {get_base_info,get_cpu_info,get_mem_info,get_disk_list,get_disk_info,get_disk_util_list,get_disk_util_info,get_network_interface_list,get_network_info,get_connections_info,get_pids_info} from '../../ajax/api';
 const { TabPane } = Tabs;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -23,7 +23,10 @@ class Monitor extends Component {
             disk_util_data:[{legend:""}],
             disk_util_list:[],
             network_list:[],
-            network_data:[{legend:""}]
+            network_data:[{legend:""}],
+            connections_list:[],
+            connections_data:[],
+            pids_data:[]
             // id:props.location.query.id
         };
         this.loader = [];
@@ -90,6 +93,8 @@ class Monitor extends Component {
         this.get_cpu(get_disk_info,"disk_data");
         this.get_cpu(get_disk_util_info,"disk_util_data");
         this.get_cpu(get_network_info,"network_data");
+        this.get_cpu(get_connections_info,"connections_data");
+        this.get_cpu(get_pids_info,"pids_data");
     }
     get_select(){
         axios_json.get(get_disk_list+"?uuid="+this.state.uuid).then(e=>{
@@ -118,9 +123,6 @@ class Monitor extends Component {
         })
     }
     get_detail(){
-        // var param={
-        //     uuid:window.localStorage.getItem("uuid")
-        // }
         axios_json.get(get_base_info+"?uuid="+window.localStorage.getItem("uuid")).then(e=>{
             var detail=e.data;
             delete detail.uuid;
@@ -169,7 +171,6 @@ class Monitor extends Component {
             startTime:start,
             endTime:end
         })
-        // this.get_cpu(start,end)
       }
       disk_change(disk_value){
         this.setState({
@@ -203,6 +204,18 @@ class Monitor extends Component {
         })
         this.get_cpu(get_network_info,"network_data",this.state.startTime,this.state.endTime,{name:"interface",value:network_value||""});
       }
+      pids_change(){
+        this.setState({
+            pids_data:[],
+        })
+        this.get_cpu(get_pids_info,"pids_data",this.state.startTime,this.state.endTime);
+      }
+      connections_change(){
+        this.setState({
+            connections_data:[],
+        })
+        this.get_cpu(get_connections_info,"connections_data",this.state.startTime,this.state.endTime);
+      }
     render() {
         return (
             <div className="">
@@ -224,9 +237,6 @@ class Monitor extends Component {
                                 <div style={{marginBottom:"20px"}}>
                                     <div className="echart_title">CPU状态</div>
                                     <div style={{overflow:"hidden"}}>
-                                        {/* <Echarts title="CPU使用率" api="/api/get_cpu_info" width="30%" right="5%"></Echarts>
-                                        <Echarts title="内存使用量" api="" width="30%" right="5%"></Echarts>
-                                        <Echarts title="系统平均负载" api="" width="30%"></Echarts> */}
                                         {
                                             this.state.cpu_data.map((i,k)=>{
                                                 return <Echarts title="CPU使用率" api="" width="45%"  data={i} key={k} right={(Number(k)===this.state.cpu_data.length-1)?"0":"5%"} text={i.legend} />
@@ -305,13 +315,44 @@ class Monitor extends Component {
                                     }
                                 </Select>
                                 <Button type="primary" size="small" onClick={()=>{this.network_change(this.state.network_value)}} style={{marginLeft:"10px"}}>确定</Button>
-                                </div>
-                                
+                                </div>                               
                                 <div style={{marginBottom:"20px"}}>
                                     <div style={{overflow:"hidden"}}>
                                     {
                                             this.state.network_data.map((i,k)=>{
                                                 return <Echarts title="CPU使用率" api="" width="45%"  data={i} key={k} right={(Number(k)===this.state.network_data.length-1)?"0":"5%"} text={i?i.legend:""} />
+                                            })
+                                        }
+                                    </div>
+                                </div>
+                            </TabPane>
+                            <TabPane tab="连接数" key="5">
+                                <div style={{marginBottom:"10px"}}>
+                                    <span>选择时间：</span>
+                                    <RangePicker showTime={{ format: 'HH:mm' }} format="YYYY-MM-DD HH:mm" onChange={this.onChange.bind(this)}/>
+                                    <Button type="primary" size="small" onClick={()=>{this.connections_change(this.state.network_value)}} style={{marginLeft:"10px"}}>确定</Button>
+                                </div>                               
+                                <div style={{marginBottom:"20px"}}>
+                                    <div style={{overflow:"hidden"}}>
+                                    {
+                                            this.state.connections_data.map((i,k)=>{
+                                                return <Echarts title="连接数" api="" width="45%"  data={i} key={k} right={(Number(k)===this.state.connections_data.length-1)?"0":"5%"} text={i?i.legend:""} />
+                                            })
+                                        }
+                                    </div>
+                                </div>
+                            </TabPane>
+                            <TabPane tab="进程数" key="6">
+                                <div style={{marginBottom:"10px"}}>
+                                    <span>选择时间：</span>
+                                    <RangePicker showTime={{ format: 'HH:mm' }} format="YYYY-MM-DD HH:mm" onChange={this.onChange.bind(this)}/>
+                                    <Button type="primary" size="small" onClick={()=>{this.pids_change(this.state.network_value)}} style={{marginLeft:"10px"}}>确定</Button>
+                                </div>                               
+                                <div style={{marginBottom:"20px"}}>
+                                    <div style={{overflow:"hidden"}}>
+                                    {
+                                            this.state.pids_data.map((i,k)=>{
+                                                return <Echarts title="连接数" api="" width="45%"  data={i} key={k} right={(Number(k)===this.state.pids_data.length-1)?"0":"5%"} text={i?i.legend:""} />
                                             })
                                         }
                                     </div>

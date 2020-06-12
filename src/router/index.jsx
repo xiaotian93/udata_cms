@@ -3,6 +3,7 @@ import { Route, Redirect,Switch } from 'react-router-dom';
 import Host_monitor from '../components/list/hostMonitor';
 import Host_monitor_detail from '../components/detail/hostMonitor_detail';
 import Nofound from '../components/notFound';
+import Band from '../components/list/broadband';
 export default class CRouter extends Component {
     componentWillMount() {
         this.router_info = [
@@ -21,6 +22,10 @@ export default class CRouter extends Component {
             {
                 path: "/host/detail",
                 components: Host_monitor_detail
+            },
+            {
+                path: "/broadband",
+                components: Band
             },
         ]
     }

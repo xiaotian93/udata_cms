@@ -57,7 +57,7 @@ class List extends Component {
                                     {this.props.tableTitle.right}
                                 </div>
                             </div>
-                            <Table {...this.props.tableInfo} bordered className="tableInfo" style={{width:"100%"}} />
+                            <Table {...this.props.tableInfo} bordered className="tableInfo" style={{width:"100%"}} loading={this.props.loading} />
                             {/* <Table {...this.props.tableInfo} bordered className="tablefixed" style={{width:"100%"}} /> */}
                         </Row>
                     </Row>
