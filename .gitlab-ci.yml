@@ -27,7 +27,7 @@ build:
     - CI=false npm run build
   artifacts:
     paths:
-      - static/
+      - $OUTPUT_DIR
     expire_in: 1 day
 
 after-build:
