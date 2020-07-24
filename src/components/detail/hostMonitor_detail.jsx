@@ -18,18 +18,20 @@ class Monitor extends Component {
             mem_data:[],
             disk_list:[],
             disk_data:[{legend:""}],
-            startTime:moment().subtract(0,"days").format("YYYY-MM-DD")+ " 00:00:00",
-            endTime:moment().subtract(0,"days").format("YYYY-MM-DD")+ " 23:59:59",
+            startTime:moment().subtract(1,"days").format("YYYY-MM-DD")+ " 00:00:00",
+            endTime:moment().subtract(0,"days").format("YYYY-MM-DD HH:mm")+ ":00",
             disk_util_data:[{legend:""}],
             disk_util_list:[],
             network_list:[],
             network_data:[{legend:""}],
             connections_list:[],
             connections_data:[],
-            pids_data:[]
+            pids_data:[],
+            defaultTime:[moment(moment().subtract(1,"days").format("YYYY-MM-DD")+" 00:00"),moment()]
             // id:props.location.query.id
         };
         this.loader = [];
+        // this.defaultTime=[moment(moment().subtract(1,"days").format("YYYY-MM-DD")+" 00:00"),moment()]
     }
     componentWillMount() {
         this.detailData = {
@@ -169,7 +171,8 @@ class Monitor extends Component {
         var end=dateString[1];
         this.setState({
             startTime:start,
-            endTime:end
+            endTime:end,
+            defaultTime:value
         })
       }
       disk_change(disk_value){
@@ -217,6 +220,12 @@ class Monitor extends Component {
         this.get_cpu(get_connections_info,"connections_data",this.state.startTime,this.state.endTime);
       }
     render() {
+        const RangePickerInfo={
+            showTime:{ format: 'HH:mm' ,defaultValue:[moment('00:00', 'HH:mm'),moment('23:59', 'HH:mm')]},
+            format:"YYYY-MM-DD HH:mm",
+            onChange:this.onChange.bind(this),
+            value:this.state.defaultTime
+        }
         return (
             <div className="">
                 <div className="card">
@@ -231,7 +240,7 @@ class Monitor extends Component {
                             <TabPane tab="操作系统监控" key="1">
                                 <div style={{marginBottom:"10px"}}>
                                     <span>选择时间：</span>
-                                    <RangePicker showTime={{ format: 'HH:mm' }} format="YYYY-MM-DD HH:mm" onChange={this.onChange.bind(this)}/>
+                                    <RangePicker {...RangePickerInfo} />
                                     <Button type="primary" size="small" onClick={this.cpu_change.bind(this)} style={{marginLeft:"10px"}}>确定</Button>
                                 </div>
                                 <div style={{marginBottom:"20px"}}>
@@ -258,7 +267,7 @@ class Monitor extends Component {
                             <TabPane tab="磁盘状态" key="2">
                                 <div style={{marginBottom:"10px"}}>
                                     <span>选择时间：</span>
-                                    <RangePicker showTime={{ format: 'HH:mm' }} format="YYYY-MM-DD HH:mm" onChange={this.onChange.bind(this)}/>
+                                    <RangePicker {...RangePickerInfo} />
                                     <Select style={{width:"150px",marginLeft:"10px"}} placeholder="请选择磁盘" onChange={(e)=>{this.change_select(e,"disk_value")}} value={this.state.disk_value}>
                                     {
                                         this.state.disk_list.map((i,k)=>{
@@ -282,7 +291,7 @@ class Monitor extends Component {
                             <TabPane tab="磁盘负载详情" key="3">
                                 <div style={{marginBottom:"10px"}}>
                                     <span>选择时间：</span>
-                                    <RangePicker showTime={{ format: 'HH:mm' }} format="YYYY-MM-DD HH:mm" onChange={this.onChange.bind(this)}/>
+                                    <RangePicker {...RangePickerInfo} />
                                     <Select style={{width:"150px",marginLeft:"10px"}} placeholder="请选择磁盘负载" onChange={(e)=>{this.change_select(e,"disk_util_value")}} value={this.state.disk_util_value}>
                                     {
                                         this.state.disk_util_list.map((i,k)=>{
@@ -306,7 +315,7 @@ class Monitor extends Component {
                             <TabPane tab="网络详情" key="4">
                                 <div style={{marginBottom:"10px"}}>
                                     <span>选择时间：</span>
-                                    <RangePicker showTime={{ format: 'HH:mm' }} format="YYYY-MM-DD HH:mm" onChange={this.onChange.bind(this)}/>
+                                    <RangePicker {...RangePickerInfo} />
                                     <Select style={{width:"150px",marginLeft:"10px"}} placeholder="请选择网络详情" onChange={(e)=>{this.change_select(e,"network_value")}} value={this.state.network_value}>
                                     {
                                         this.state.network_list.map((i,k)=>{
@@ -329,7 +338,7 @@ class Monitor extends Component {
                             <TabPane tab="连接数" key="5">
                                 <div style={{marginBottom:"10px"}}>
                                     <span>选择时间：</span>
-                                    <RangePicker showTime={{ format: 'HH:mm' }} format="YYYY-MM-DD HH:mm" onChange={this.onChange.bind(this)}/>
+                                    <RangePicker {...RangePickerInfo} />
                                     <Button type="primary" size="small" onClick={()=>{this.connections_change(this.state.network_value)}} style={{marginLeft:"10px"}}>确定</Button>
                                 </div>                               
                                 <div style={{marginBottom:"20px"}}>
@@ -345,7 +354,7 @@ class Monitor extends Component {
                             <TabPane tab="进程数" key="6">
                                 <div style={{marginBottom:"10px"}}>
                                     <span>选择时间：</span>
-                                    <RangePicker showTime={{ format: 'HH:mm' }} format="YYYY-MM-DD HH:mm" onChange={this.onChange.bind(this)}/>
+                                    <RangePicker {...RangePickerInfo} />
                                     <Button type="primary" size="small" onClick={()=>{this.pids_change(this.state.network_value)}} style={{marginLeft:"10px"}}>确定</Button>
                                 </div>                               
                                 <div style={{marginBottom:"20px"}}>
