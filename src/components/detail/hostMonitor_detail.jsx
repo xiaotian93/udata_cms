@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import TableCol from '../templates/TableCol_4';
-import { Tabs,DatePicker,Select,Button } from 'antd';
+import { Tabs,DatePicker,Select,Button,Spin } from 'antd';
 import Echarts from '../templates/echarts';
 import {axios_json} from '../../ajax/request';
 import moment from 'moment';
@@ -136,6 +136,9 @@ class Monitor extends Component {
 
     }
     get_cpu(api,status,start,end,disk){
+        this.setState({
+            spin:true
+        })
         axios_json.get(api+"?uuid="+this.state.uuid+"&start="+(start||this.state.startTime)+"&end="+(end||this.state.endTime)+(disk?("&"+disk.name+"="+disk.value):"")).then(e=>{
             var data=e.data,dataX=[],cpu_data=[];
             for(var k in data[0].data){
@@ -154,13 +157,18 @@ class Monitor extends Component {
                 var cpu_json={
                     series_info:series_info,
                     dataX:dataX,
-                    legend:data[i].name
+                    legend:data[i].name,
+                    api:api,
+                    startTime:start||this.state.startTime,
+                    endTime:end||this.state.endTime,
+                    uuid:this.state.uuid
                 }
                 }
                 cpu_data.push(cpu_json);
             }           
             this.setState({
-                [status]:cpu_data
+                [status]:cpu_data,
+                spin:false
             })
         })
     }
@@ -184,9 +192,15 @@ class Monitor extends Component {
       cpu_change(){
         this.setState({
             cpu_data:[],
-            mem_data:[]
+            // mem_data:[]
         })
         this.get_cpu(get_cpu_info,"cpu_data",this.state.startTime,this.state.endTime);
+        // this.get_cpu(get_mem_info,"mem_data",this.state.startTime,this.state.endTime);
+      }
+      men_change(){
+        this.setState({
+            mem_data:[]
+        })
         this.get_cpu(get_mem_info,"mem_data",this.state.startTime,this.state.endTime);
       }
       change_select(value,name){
@@ -236,15 +250,16 @@ class Monitor extends Component {
                 </div>
                 <div className="card">
                     <div className="card_content">
+                        <Spin spinning={this.state.spin} >
                         <Tabs type="card">
-                            <TabPane tab="操作系统监控" key="1">
+                            <TabPane tab="CPU状态" key="1">
                                 <div style={{marginBottom:"10px"}}>
                                     <span>选择时间：</span>
                                     <RangePicker {...RangePickerInfo} />
                                     <Button type="primary" size="small" onClick={this.cpu_change.bind(this)} style={{marginLeft:"10px"}}>确定</Button>
                                 </div>
                                 <div style={{marginBottom:"20px"}}>
-                                    <div className="echart_title">CPU状态</div>
+                                    {/* <div className="echart_title">CPU状态</div> */}
                                     <div style={{overflow:"hidden"}}>
                                         {
                                             this.state.cpu_data.map((i,k)=>{
@@ -253,8 +268,14 @@ class Monitor extends Component {
                                         }
                                     </div>
                                 </div>
+                            </TabPane>
+                            <TabPane tab="内存信息" key="7">
+                                <div style={{marginBottom:"10px"}}>
+                                    <span>选择时间：</span>
+                                    <RangePicker {...RangePickerInfo} />
+                                    <Button type="primary" size="small" onClick={this.men_change.bind(this)} style={{marginLeft:"10px"}}>确定</Button>
+                                </div>
                                 <div style={{marginBottom:"20px"}}>
-                                    <div className="echart_title">内存信息</div>
                                     <div style={{overflow:"hidden"}}>
                                         {
                                             this.state.mem_data.map((i,k)=>{
@@ -368,6 +389,7 @@ class Monitor extends Component {
                                 </div>
                             </TabPane>
                         </Tabs>
+                        </Spin>
                     </div>
                 </div>
 

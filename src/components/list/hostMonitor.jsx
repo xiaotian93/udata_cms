@@ -54,6 +54,7 @@ class Monitor extends Component{
             {
                 title:"cpu_percent",
                 dataIndex:"cpu_percent",
+                render:e=>e?e+"%":"0%",
                 sorter:(a,b)=>{
                     return get_sort(a,b,"cpu_percent")
                 }
@@ -61,6 +62,15 @@ class Monitor extends Component{
             {
                 title:"disk_percent",
                 dataIndex:"disk_percent",
+                render:e=>e?e+"%":"0%",
+                sorter:(a,b)=>{
+                    return get_sort(a,b,"disk_percent")
+                }
+            },
+            {
+                title:"mem_percent",
+                dataIndex:"mem_percent",
+                render:e=>e?e+"%":"0%",
                 sorter:(a,b)=>{
                     return get_sort(a,b,"disk_percent")
                 }
@@ -147,7 +157,9 @@ class Monitor extends Component{
                     pageTotal:data.total,
                     loading:false
                 })
-                window.localStorage.setItem("listDada",JSON.stringify(list));
+                if(!name||select){
+                    window.localStorage.setItem("listDada",JSON.stringify(list));
+                }
             }
         })
         

@@ -30,7 +30,7 @@ export default class CRouter extends Component {
         ]
     }
     render() {
-        var pathname=window.location.pathname;console.log(pathname)
+        var pathname=window.location.pathname;
         return (
             <div>
                 {pathname==="/"?<Redirect to="/host"></Redirect>:null}

@@ -28,12 +28,11 @@ class SiderCustom extends Component {
         this.setState({
             openKeys:[openKeys.join("/")]
         })
-        console.log(openKeys.join("/"))
     }
     render() {
         // var data=this.props.data;
-        let keys = document.location.pathname;console.log(keys.split("/"))
-        keys = keys.split("/").splice(0,2).join("/");console.log(keys)
+        let keys = document.location.pathname;
+        keys = keys.split("/").splice(0,2).join("/");
         // var heights=window.innerHeight-170;
         return (
                 <Menu defaultSelectedKeys={[keys]} onOpenChange={this.onOpenChange.bind(this)} openKeys={this.state.openKeys} onSelect={this.onSelect.bind(this)} mode="inline" selectedKeys={[keys]} style={{marginTop:"10px",overflowY:"auto",overflowX:"hidden"}} theme="dark">
