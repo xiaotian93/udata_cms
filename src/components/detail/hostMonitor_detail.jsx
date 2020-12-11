@@ -13,7 +13,7 @@ class Monitor extends Component {
         super(props);
         this.state = {
             data:{},
-            uuid:window.localStorage.getItem("uuid"),
+            // uuid:window.localStorage.getItem("uuid"),
             cpu_data:[],
             mem_data:[],
             disk_list:[],
@@ -27,13 +27,14 @@ class Monitor extends Component {
             connections_list:[],
             connections_data:[],
             pids_data:[],
-            defaultTime:[moment(moment().subtract(1,"days").format("YYYY-MM-DD")+" 00:00"),moment()]
-            // id:props.location.query.id
+            defaultTime:[moment(moment().subtract(1,"days").format("YYYY-MM-DD")+" 00:00"),moment()],
+            uuid:props.location.state.id
         };
         this.loader = [];
         // this.defaultTime=[moment(moment().subtract(1,"days").format("YYYY-MM-DD")+" 00:00"),moment()]
     }
     componentWillMount() {
+        console.log(this.props.location.state)
         this.detailData = {
             agent_version: {
                 name: "agent_version"
@@ -88,18 +89,21 @@ class Monitor extends Component {
         }
     }
     componentDidMount() {
-        this.get_detail();
-        this.get_select();
-        this.get_cpu(get_cpu_info,"cpu_data");
-        this.get_cpu(get_mem_info,"mem_data");
-        this.get_cpu(get_disk_info,"disk_data");
-        this.get_cpu(get_disk_util_info,"disk_util_data");
-        this.get_cpu(get_network_info,"network_data");
-        this.get_cpu(get_connections_info,"connections_data");
-        this.get_cpu(get_pids_info,"pids_data");
+        this.get_runing(this.state.uuid)
     }
-    get_select(){
-        axios_json.get(get_disk_list+"?uuid="+this.state.uuid).then(e=>{
+    get_runing(uuid){
+        this.get_detail(uuid);
+        this.get_select(uuid);
+        this.get_cpu(uuid,get_cpu_info,"cpu_data");
+        this.get_cpu(uuid,get_mem_info,"mem_data");
+        this.get_cpu(uuid,get_disk_info,"disk_data");
+        this.get_cpu(uuid,get_disk_util_info,"disk_util_data");
+        this.get_cpu(uuid,get_network_info,"network_data");
+        this.get_cpu(uuid,get_connections_info,"connections_data");
+        this.get_cpu(uuid,get_pids_info,"pids_data");
+    }
+    get_select(uuid){
+        axios_json.get(get_disk_list+"?uuid="+(uuid||this.state.uuid)).then(e=>{
             var data=e.data;
             this.disk_change(data[0]);
             this.setState({
@@ -107,7 +111,7 @@ class Monitor extends Component {
                 disk_value:data[0]
             })
         })
-        axios_json.get(get_disk_util_list+"?uuid="+this.state.uuid).then(e=>{
+        axios_json.get(get_disk_util_list+"?uuid="+(uuid||this.state.uuid)).then(e=>{
             var data=e.data;
             this.disk_util_change(data[0])
             this.setState({
@@ -115,7 +119,7 @@ class Monitor extends Component {
                 disk_util_value:data[0]
             })
         })
-        axios_json.get(get_network_interface_list+"?uuid="+this.state.uuid).then(e=>{
+        axios_json.get(get_network_interface_list+"?uuid="+(uuid||this.state.uuid)).then(e=>{
             var data=e.data;
             this.network_change(data[0])
             this.setState({
@@ -124,22 +128,20 @@ class Monitor extends Component {
             })
         })
     }
-    get_detail(){
-        axios_json.get(get_base_info+"?uuid="+window.localStorage.getItem("uuid")).then(e=>{
+    get_detail(uuid){
+        axios_json.get(get_base_info+"?uuid="+(uuid||this.state.uuid)).then(e=>{
             var detail=e.data;
             delete detail.uuid;
             this.setState({
                 data:detail
             })
         })
-    
-
     }
-    get_cpu(api,status,start,end,disk){
+    get_cpu(uuid,api,status,start,end,disk){
         this.setState({
             spin:true
         })
-        axios_json.get(api+"?uuid="+this.state.uuid+"&start="+(start||this.state.startTime)+"&end="+(end||this.state.endTime)+(disk?("&"+disk.name+"="+disk.value):"")).then(e=>{
+        axios_json.get(api+"?uuid="+(uuid||this.state.uuid)+"&start="+(start||this.state.startTime)+"&end="+(end||this.state.endTime)+(disk?("&"+disk.name+"="+disk.value):"")).then(e=>{
             var data=e.data,dataX=[],cpu_data=[];
             for(var k in data[0].data){
                 dataX.push(data[0].data[k][0])
@@ -187,21 +189,21 @@ class Monitor extends Component {
         this.setState({
             disk_data:[],
         })
-        this.get_cpu(get_disk_info,"disk_data",this.state.startTime,this.state.endTime,{name:"device",value:disk_value||""});
+        this.get_cpu(this.state.uuid,get_disk_info,"disk_data",this.state.startTime,this.state.endTime,{name:"device",value:disk_value||""});
       }
       cpu_change(){
         this.setState({
             cpu_data:[],
             // mem_data:[]
         })
-        this.get_cpu(get_cpu_info,"cpu_data",this.state.startTime,this.state.endTime);
+        this.get_cpu(this.state.uuid,get_cpu_info,"cpu_data",this.state.startTime,this.state.endTime);
         // this.get_cpu(get_mem_info,"mem_data",this.state.startTime,this.state.endTime);
       }
       men_change(){
         this.setState({
             mem_data:[]
         })
-        this.get_cpu(get_mem_info,"mem_data",this.state.startTime,this.state.endTime);
+        this.get_cpu(this.state.uuid,get_mem_info,"mem_data",this.state.startTime,this.state.endTime);
       }
       change_select(value,name){
           console.log(value)
@@ -213,13 +215,13 @@ class Monitor extends Component {
         this.setState({
             disk_util_data:[],
         })
-        this.get_cpu(get_disk_util_info,"disk_util_data",this.state.startTime,this.state.endTime,{name:"device",value:disk_util_value||""});
+        this.get_cpu(this.state.uuid,get_disk_util_info,"disk_util_data",this.state.startTime,this.state.endTime,{name:"device",value:disk_util_value||""});
       }
       network_change(network_value){
         this.setState({
             network_data:[],
         })
-        this.get_cpu(get_network_info,"network_data",this.state.startTime,this.state.endTime,{name:"interface",value:network_value||""});
+        this.get_cpu(this.state.uuid,get_network_info,"network_data",this.state.startTime,this.state.endTime,{name:"interface",value:network_value||""});
       }
       pids_change(){
         this.setState({
@@ -231,15 +233,33 @@ class Monitor extends Component {
         this.setState({
             connections_data:[],
         })
-        this.get_cpu(get_connections_info,"connections_data",this.state.startTime,this.state.endTime);
+        this.get_cpu(this.state.uuid,get_connections_info,"connections_data",this.state.startTime,this.state.endTime);
+      }
+      //host change
+      hostChange(value){
+        this.setState({
+            uuid:value
+        })
+        this.get_runing(value)
       }
     render() {
+        const listDada=JSON.parse(window.localStorage.getItem("listDada"))||[],selectData=[];
+        listDada.forEach(item=>{
+            selectData.push({name:item.hostname,value:item.uuid})
+        })
         const RangePickerInfo={
             showTime:{ format: 'HH:mm' ,defaultValue:[moment('00:00', 'HH:mm'),moment('23:59', 'HH:mm')]},
             format:"YYYY-MM-DD HH:mm",
             onChange:this.onChange.bind(this),
             value:this.state.defaultTime
         }
+        const selectHost=<div><span>hostname：</span><Select style={{width:180}} value={this.state.uuid} onChange={this.hostChange.bind(this)}>
+            {
+                listDada.map(item=>{
+                    return <Option value={item.uuid}>{item.hostname}</Option>
+                })
+            }
+        </Select></div>
         return (
             <div className="">
                 <div className="card">
@@ -251,7 +271,7 @@ class Monitor extends Component {
                 <div className="card">
                     <div className="card_content">
                         <Spin spinning={this.state.spin} >
-                        <Tabs type="card">
+                        <Tabs type="card" tabBarExtraContent={selectHost}>
                             <TabPane tab="CPU状态" key="1">
                                 <div style={{marginBottom:"10px"}}>
                                     <span>选择时间：</span>

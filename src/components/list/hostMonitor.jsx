@@ -165,9 +165,9 @@ class Monitor extends Component{
         
     }
     detail(id){
-        // this.props.history.push('/host/detail/'+id);
+        // this.props.history.push('/host/detail?id='+id);
         window.localStorage.setItem("uuid",id);
-        this.props.history.push({pathname:'/host/detail',query:{"id":id}});
+        this.props.history.push({pathname:'/host/detail',state:{"id":id}});
 
     }
     get_filter(data){
