@@ -93,14 +93,15 @@ class Monitor extends Component {
     }
     get_runing(uuid){
         this.get_detail(uuid);
-        this.get_select(uuid);
         this.get_cpu(uuid,get_cpu_info,"cpu_data");
         this.get_cpu(uuid,get_mem_info,"mem_data");
-        this.get_cpu(uuid,get_disk_info,"disk_data");
-        this.get_cpu(uuid,get_disk_util_info,"disk_util_data");
-        this.get_cpu(uuid,get_network_info,"network_data");
+        // this.get_cpu(uuid,get_disk_info,"disk_data");
+        // this.get_cpu(uuid,get_disk_util_info,"disk_util_data");
+        // this.get_cpu(uuid,get_network_info,"network_data");
         this.get_cpu(uuid,get_connections_info,"connections_data");
         this.get_cpu(uuid,get_pids_info,"pids_data");
+        this.get_select(uuid);
+
     }
     get_select(uuid){
         axios_json.get(get_disk_list+"?uuid="+(uuid||this.state.uuid)).then(e=>{
@@ -146,6 +147,14 @@ class Monitor extends Component {
             for(var k in data[0].data){
                 dataX.push(data[0].data[k][0])
             }
+            if(data.length<1){
+                cpu_data.push({uuid:uuid||this.state.uuid});
+                this.setState({
+                    [status]:cpu_data,
+                    spin:false
+                })
+                return;
+            }
             for(var i in data){
                 var base=data[i].data;
                 var series_data=[],series_json={};
@@ -163,7 +172,7 @@ class Monitor extends Component {
                     api:api,
                     startTime:start||this.state.startTime,
                     endTime:end||this.state.endTime,
-                    uuid:this.state.uuid
+                    uuid:uuid||this.state.uuid
                 }
                 }
                 cpu_data.push(cpu_json);
@@ -240,7 +249,17 @@ class Monitor extends Component {
         this.setState({
             uuid:value
         })
-        this.get_runing(value)
+        this.get_detail(value);
+        this.get_cpu(value,get_cpu_info,"cpu_data");
+        this.get_cpu(value,get_mem_info,"mem_data");
+        // this.get_cpu(value,get_disk_info,"disk_data");
+        this.get_cpu(value,get_disk_info,"disk_data",this.state.startTime,this.state.endTime,{name:"device",value:this.state.disk_value||""});
+        // this.get_cpu(value,get_disk_util_info,"disk_util_data");
+        this.get_cpu(value,get_disk_util_info,"disk_util_data",this.state.startTime,this.state.endTime,{name:"device",value:this.state.disk_util_value||""});
+        // this.get_cpu(value,get_network_info,"network_data");
+        this.get_cpu(value,get_network_info,"network_data",this.state.startTime,this.state.endTime,{name:"interface",value:this.state.network_value||""});
+        this.get_cpu(value,get_connections_info,"connections_data");
+        this.get_cpu(value,get_pids_info,"pids_data");
       }
     render() {
         const listDada=JSON.parse(window.localStorage.getItem("listDada"))||[],selectData=[];
@@ -260,6 +279,7 @@ class Monitor extends Component {
                 })
             }
         </Select></div>
+        // console.log(this.state.cpu_data,this.state.uuid)
         return (
             <div className="">
                 <div className="card">

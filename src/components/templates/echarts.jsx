@@ -19,9 +19,11 @@ class Monitor extends Component {
             setOption: {},
             data: props.data,
             modal:props.data,
-            selectHost:props.data.uuid
+            selectHost:props.data?props.data.uuid:""
+            // selectHost:props.data.uuid
+
         };
-        this.info=props.data.uuid;
+        this.info=props.data?props.data.uuid:"";
     }
     componentWillMount() {
         var yAxisInfo = { type: 'value' }, tooltip = { trigger: 'axis' };
@@ -206,7 +208,7 @@ class Monitor extends Component {
                 <ReactEchartsCore option={this.option} style={{ "width": "100%", "height": "300px" }} echarts={echarts} />
                 <Modal {...modal_info}>
                     {!this.props.hiddenSelect?<span>hostname：</span>:null}
-                    {!this.props.hiddenSelect?<Select showSearch style={{ width: 200 }} placeholder="Select a hostname" optionFilterProp="children" onChange={this.onChange.bind(this)} onFocus={this.onFocus.bind(this)} onBlur={this.onBlur.bind(this)} onSearch={this.onSearch.bind(this)} filterOption={(input, option) =>option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0} value={this.state.selectHost}>
+                    {!this.props.hiddenSelect?<Select showSearch style={{ width: 200 }} placeholder="Select a hostname" optionFilterProp="children" onChange={this.onChange.bind(this)} onFocus={this.onFocus.bind(this)} onBlur={this.onBlur.bind(this)} onSearch={this.onSearch.bind(this)} filterOption={(input, option) =>option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0} value={this.props.data.uuid}>
                             {optionData.map((i,k)=>{
                                 return <Option value={i.uuid} key={k}>{i.hostname}</Option>
                             })}
